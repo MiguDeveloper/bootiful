@@ -1,13 +1,13 @@
 package pe.tuna.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import pe.tuna.models.CitaBean;
 import pe.tuna.models.EmpleadoBean;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,8 +31,11 @@ public class EmpleadoController {
         if (id > 0 && id <= repo.size()) {
             return repo.get(id - 1);
         } else {
-            response.setStatus(404);
-            return null;
+            // response.setStatus(404);
+            // return null;
+
+            // Una tercera forma es la definicion de nuestros propios métodos de excepcion
+            throw new EmpleadoNotFoundException(id);
         }
     }
 
@@ -45,21 +48,56 @@ public class EmpleadoController {
         return null;
     }
 
+    // La segunda manera es la asociacion con las excepciones
     @GetMapping("/empleado/{idE}/cita/{idC}")
-    public CitaBean getCitaEmpleado(@PathVariable int idE, @PathVariable int idC) {
+    public CitaBean getCitaEmpleado(@PathVariable int idE, @PathVariable int idC, HttpServletRequest request) throws NoHandlerFoundException {
+
+        CitaBean result = null;
+
         if (idE > 0 && idE <= repo.size()) {
             List<CitaBean> citas = repo.get(idE - 1).getCitas();
             if (citas != null) {
                 for (CitaBean c : citas) {
                     if (c.getId() == idC) {
-                        return c;
+                        result = c;
                     }
                 }
             }
         }
 
-        return null;
+        if (result != null) {
+            return result;
+        } else {
+            throw new NoHandlerFoundException("GET", request.getRequestURI().toString(), null);
+        }
+
     }
+
+
+    // Este metodo es el encargado de manejar el error causado por una cita inexistente con excepciones
+    // la descripcion del mensaje de error es generica y por ello la cambiamos a traves de las anotaciones
+    // @ResponseStatus, @ExceptionHandler devolviendo un determinado código de respuesta y modificando el mensaje a nuestro
+    // antojo, y el metodo no tendria nada de codigo que implementar
+    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "la cita no existe") // seteamos alguno campos de la rpta
+    @ExceptionHandler(NoHandlerFoundException.class) // La excepcion NoHandlerFoundException corresponde con el 404
+    public void citaInexistente() {
+        //vacio
+    }
+
+    // Tercer metodo implementando nuestros propios metodos de excpeciones
+    // Usamos esta anotacion si cambiamos el mensaje
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    // usamos esta anotacion si no queremos cambiar el mensaje y lanzar un mensaje generico
+    // @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Empleado no encontrado!!")
+    private class EmpleadoNotFoundException extends RuntimeException{
+        private static final long serialVersionUID = -547477474747474959L;
+
+        // sobre escribimos el constructor de runtimeException
+        public EmpleadoNotFoundException(int id){
+            super(String.format("El empleado %d no existe", id));
+        }
+    }
+
 
     @PostConstruct
     private void init() {
