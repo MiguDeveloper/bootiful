@@ -35,7 +35,7 @@ public class ColaboradorController {
         return colaboradorService.getByIdColaborador(id);
     }
 
-    // Primera forma bastante sencilla de hacer un post
+    // Primera forma de devolver el response code bastante sencilla de hacer un post
     @PostMapping("/add")
     public ColaboradorBean createColaborador(@RequestBody ColaboradorBean colaboradorBean, HttpServletResponse response) {
         ColaboradorBean colaborador = new ColaboradorBean(colaboradorBean.getNombre(), colaboradorBean.getApellidos(), colaboradorBean.getFechaNacimiento());
@@ -43,7 +43,7 @@ public class ColaboradorController {
         return colaboradorService.createColaborador(colaborador);
     }
 
-    // Segunda forma de post pero mas completa
+    // Segunda forma de devolver el response code de post pero mas completa
     @PostMapping("/add2")
     public ResponseEntity<?> createColaborador(RequestEntity<ColaboradorBean> reqColaborador) {
         if (reqColaborador.getBody() == null) {
@@ -59,6 +59,24 @@ public class ColaboradorController {
                     " ya existe"), HttpStatus.CONFLICT);
         } else {
             return new ResponseEntity<ColaboradorBean>(colaboradorService.createColaborador(colaboradorBean), HttpStatus.CREATED);
+        }
+    }
+
+    @PutMapping("/empleado/{id}")
+    public ResponseEntity<?> updateColaborador(@PathVariable int id, RequestEntity<ColaboradorBean> reqColaborador) {
+        if (reqColaborador.getBody() == null) {
+            return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de peticion incorrecta. Debe enviar datos"), HttpStatus.BAD_REQUEST);
+        }
+
+        Optional<ColaboradorBean> colaboradorEncontrado = repo.findById(id);
+
+        if (colaboradorEncontrado.isPresent()) {
+            ColaboradorBean colaboradorBean = reqColaborador.getBody();
+            ColaboradorBean colaboradorA_actualizar = new ColaboradorBean(id, colaboradorBean.getNombre(),
+                    colaboradorBean.getApellidos(), colaboradorBean.getFechaNacimiento());
+            return new ResponseEntity<ColaboradorBean>(repo.save(colaboradorA_actualizar), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<ErrorRest>(new ErrorRest("El empleado a modificar no existe"), HttpStatus.NOT_FOUND);
         }
     }
 

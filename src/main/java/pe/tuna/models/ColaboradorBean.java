@@ -31,6 +31,13 @@ public class ColaboradorBean {
         this.fechaNacimiento = fechaNacimiento;
     }
 
+    public ColaboradorBean(int id, String nombre, String apellidos, Date fechaNacimiento) {
+        this.id = id;
+        this.nombre = nombre;
+        this.apellidos = apellidos;
+        this.fechaNacimiento = fechaNacimiento;
+    }
+
     public int getId() {
         return id;
     }
