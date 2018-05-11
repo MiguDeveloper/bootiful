@@ -6,6 +6,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.tuna.models.ColaboradorBean;
+import pe.tuna.models.EmpleadoBean;
 import pe.tuna.repository.ColaboradorRepository;
 import pe.tuna.serviceImpl.ColaboradorServiceImpl;
 import pe.tuna.util.ErrorRest;
@@ -62,7 +63,7 @@ public class ColaboradorController {
         }
     }
 
-    @PutMapping("/empleado/{id}")
+    @PutMapping("/colaborador/{id}")
     public ResponseEntity<?> updateColaborador(@PathVariable int id, RequestEntity<ColaboradorBean> reqColaborador) {
         if (reqColaborador.getBody() == null) {
             return new ResponseEntity<ErrorRest>(new ErrorRest("Formato de peticion incorrecta. Debe enviar datos"), HttpStatus.BAD_REQUEST);
@@ -79,5 +80,17 @@ public class ColaboradorController {
             return new ResponseEntity<ErrorRest>(new ErrorRest("El empleado a modificar no existe"), HttpStatus.NOT_FOUND);
         }
     }
+
+    @DeleteMapping("/colaborador/{id}")
+    public ResponseEntity<?> deleteColaborador(@PathVariable int id) {
+        Optional<ColaboradorBean> colaboradorEncontrado = repo.findById(id);
+        if (colaboradorEncontrado.isPresent()) {
+            repo.deleteById(id);
+            return new ResponseEntity<ColaboradorBean>(colaboradorEncontrado.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<ErrorRest>(new ErrorRest("El empleado a borrar no existe"), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
 }

@@ -60,10 +60,17 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
+
+        <!-- Servicios autodescriptivos para el paradigma HATEOAS(Hypermedia as the Engine Of Application State) -->
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-rest -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-rest</artifactId>
+        </dependency>
+        <!-- Uso de Spring security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
 
